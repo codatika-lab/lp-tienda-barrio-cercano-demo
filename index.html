@@ -544,12 +544,6 @@ Esta evaluación documenta el uso técnico actual. Cualquier cambio que conviert
     .style-cercano footer nav a { font-size: 12px; font-weight: 800; }
     .style-cercano .rrss-link { border: 2px solid color-mix(in srgb, var(--on-footer) 72%, transparent); box-shadow: 3px 3px 0 color-mix(in srgb, var(--secondary) 82%, transparent); }
 
-    .style-cercano :where(a, button, summary):focus-visible {
-      outline: 3px solid var(--surface);
-      outline-offset: 3px;
-      box-shadow: 0 0 0 6px var(--text);
-    }
-
     @media (max-width: 900px) {
       .style-cercano .card:nth-child(3n + 2) { transform: none; }
       .style-cercano .horarios-content { gap: 34px; }
@@ -581,14 +575,6 @@ Esta evaluación documenta el uso técnico actual. Cualquier cambio que conviert
       .style-cercano .product-description { min-height: 0; font-size: 11px; }
       .style-cercano.skin-tienda-catalogo .precio { padding: 6px 8px; font-size: 13px; }
       .style-cercano .product-number { top: 8px; right: 8px; width: 32px; height: 32px; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .style-cercano .cta:hover,
-      .style-cercano .floating-btn:hover,
-      .style-cercano .rrss-link:hover { transform: none; }
-      .style-cercano .promo-nav:hover { transform: translateY(-50%); }
-      .style-cercano .card:hover img,
-      .style-cercano .gallery-item:hover img { transform: none; }
     }
   </style>
 </head>
@@ -1044,28 +1030,22 @@ Esta evaluación documenta el uso técnico actual. Cualquier cambio que conviert
         const style = document.body.dataset.visualStyle || 'elegante';
         const intensity = document.body.dataset.animationIntensity || 'equilibrada';
         const motionScale = intensity === 'impactante' ? 1 : intensity === 'sutil' ? 0.55 : 0.78;
-        const durationScale = intensity === 'impactante' ? 1.08 : intensity === 'sutil' ? 0.82 : 1;
-        const staggerDuration = intensity === 'impactante' ? 0.095 : intensity === 'sutil' ? 0.055 : 0.075;
-        const accessibleFadeFrom = style === 'cercano' ? { opacity: 0 } : { autoAlpha: 0 };
-        const accessibleFadeTo = style === 'cercano' ? { opacity: 1 } : { autoAlpha: 1 };
         gsap.registerPlugin(window.ScrollTrigger);
 
         gsap.from('.site-header-inner', {
-          ...accessibleFadeFrom,
+          autoAlpha: 0,
           y: -26,
           duration: 0.85,
-          ease: 'power3.out',
-          clearProps: 'transform,opacity,visibility'
+          ease: 'power3.out'
         });
 
         const animateHeadings = (x, duration) => {
           gsap.utils.toArray('section > h2, .horarios-content > h2').forEach((heading) => {
             gsap.from(heading, {
-              ...accessibleFadeFrom,
+              autoAlpha: 0,
               x,
               duration,
               ease: 'power3.out',
-              clearProps: 'transform,opacity,visibility',
               scrollTrigger: { trigger: heading, start: 'top 88%', once: true }
             });
           });
@@ -1198,103 +1178,89 @@ Esta evaluación documenta el uso técnico actual. Cualquier cambio que conviert
         } else if (style === 'cercano') {
           gsap.fromTo('.hero',
             { clipPath: 'inset(8% 6% 8% 6% round 54px)', scale: 0.96 },
-            {
-              clipPath: 'inset(0% 0% 0% 0% round 0px)',
-              scale: 1,
-              duration: 1.05 * durationScale,
-              ease: 'expo.out',
-              clearProps: 'clipPath,transform'
-            }
+            { clipPath: 'inset(0% 0% 0% 0% round 0px)', scale: 1, duration: 1.15, ease: 'expo.out', clearProps: 'clipPath,transform' }
           );
           gsap.fromTo('[data-animate-hero] > *',
-            { opacity: 0, y: 52 * motionScale, rotation: -2.5 * motionScale },
+            { autoAlpha: 0, y: 52 * motionScale, rotation: -2.5 * motionScale },
             {
-              opacity: 1,
+              autoAlpha: 1,
               y: 0,
               rotation: 0,
-              duration: 0.86 * durationScale,
-              stagger: staggerDuration,
+              duration: 0.9,
+              stagger: 0.11,
               delay: 0.16,
               ease: 'back.out(1.35)',
-              clearProps: 'transform,opacity'
+              clearProps: 'transform,opacity,visibility'
             }
           );
-          animateHeadings(-38 * motionScale, 0.82 * durationScale);
+          animateHeadings(-38, 0.9);
 
-          gsap.utils.toArray('[data-stagger], .credibility-grid').forEach((group) => {
-            const items = group.querySelectorAll('[data-animate-item]');
-            if (!items.length) return;
-            gsap.fromTo(items,
+          const productGrid = document.querySelector('.grid-items');
+          if (productGrid) {
+            gsap.fromTo('.grid-items > .card',
               {
-                opacity: 0,
-                clipPath: 'inset(12% 0% 0% 0% round 28px)'
+                autoAlpha: 0,
+                y: (index) => (index % 2 === 0 ? 64 : 94) * motionScale,
+                rotation: (index) => (index % 2 === 0 ? -3 : 3) * motionScale,
+                scale: 0.92
               },
               {
-                opacity: 1,
-                clipPath: 'inset(0% 0% 0% 0% round 0px)',
-                duration: 0.74 * durationScale,
-                stagger: staggerDuration,
-                ease: 'power3.out',
-                clearProps: 'opacity,clipPath',
-                scrollTrigger: { trigger: group, start: 'top 86%', once: true }
-              }
-            );
-          });
-
-          gsap.utils.toArray('.promo-carousel').forEach((carousel) => {
-            gsap.fromTo(carousel,
-              { opacity: 0, x: 76 * motionScale, rotation: 2.5 * motionScale, scale: 0.92 },
-              {
-                opacity: 1,
-                x: 0,
+                autoAlpha: 1,
+                y: 0,
                 rotation: 0,
                 scale: 1,
-                duration: 0.92 * durationScale,
-                ease: 'back.out(1.3)',
-                clearProps: 'transform,opacity',
-                scrollTrigger: { trigger: carousel, start: 'top 86%', once: true }
+                duration: 0.88,
+                stagger: 0.09,
+                ease: 'back.out(1.25)',
+                clearProps: 'transform,opacity,visibility',
+                scrollTrigger: { trigger: productGrid, start: 'top 84%', once: true }
               }
             );
+          }
+
+          gsap.utils.toArray('.promo-carousel').forEach((carousel) => {
+            gsap.from(carousel, {
+              autoAlpha: 0,
+              x: 76 * motionScale,
+              rotation: 2.5 * motionScale,
+              scale: 0.92,
+              duration: 1,
+              ease: 'back.out(1.3)',
+              scrollTrigger: { trigger: carousel, start: 'top 86%', once: true }
+            });
           });
 
-          gsap.fromTo('.contact-meta-item',
-            { opacity: 0, x: -42 * motionScale, rotation: -2 * motionScale },
-            {
-              opacity: 1,
-              x: 0,
-              rotation: 0,
-              duration: 0.7 * durationScale,
-              stagger: staggerDuration,
-              ease: 'back.out(1.25)',
-              clearProps: 'transform,opacity',
-              scrollTrigger: { trigger: '.horarios-ubicacion', start: 'top 82%', once: true }
-            }
-          );
-          gsap.fromTo('.maps-embed',
-            { opacity: 0, x: 62 * motionScale, rotation: 1.5 * motionScale },
-            {
-              opacity: 1,
-              x: 0,
-              rotation: 0,
-              duration: 0.9 * durationScale,
-              ease: 'power4.out',
-              clearProps: 'transform,opacity',
-              scrollTrigger: { trigger: '.horarios-ubicacion', start: 'top 82%', once: true }
-            }
-          );
+          gsap.utils.toArray('.gallery-grid, .testimonios-grid').forEach((group) => {
+            const items = group.querySelectorAll('[data-animate-item]');
+            if (!items.length) return;
+            gsap.from(items, {
+              autoAlpha: 0,
+              y: 46 * motionScale,
+              rotation: (index) => (index % 2 === 0 ? -2.4 : 2.4) * motionScale,
+              scale: 0.94,
+              duration: 0.82,
+              stagger: 0.08,
+              ease: 'back.out(1.2)',
+              scrollTrigger: { trigger: group, start: 'top 86%', once: true }
+            });
+          });
 
-          gsap.utils.toArray('.about > p, .reservation-widget').forEach((element) => {
-            gsap.fromTo(element,
-              { opacity: 0, y: 34 * motionScale },
-              {
-                opacity: 1,
-                y: 0,
-                duration: 0.76 * durationScale,
-                ease: 'power3.out',
-                clearProps: 'transform,opacity',
-                scrollTrigger: { trigger: element, start: 'top 88%', once: true }
-              }
-            );
+          gsap.from('.contact-meta-item', {
+            autoAlpha: 0,
+            x: -42 * motionScale,
+            rotation: -2,
+            duration: 0.72,
+            stagger: 0.1,
+            ease: 'back.out(1.25)',
+            scrollTrigger: { trigger: '.horarios-ubicacion', start: 'top 82%', once: true }
+          });
+          gsap.from('.maps-embed', {
+            autoAlpha: 0,
+            x: 62 * motionScale,
+            rotation: 1.5,
+            duration: 1,
+            ease: 'power4.out',
+            scrollTrigger: { trigger: '.horarios-ubicacion', start: 'top 82%', once: true }
           });
         } else {
           gsap.fromTo('.hero',
@@ -1372,12 +1338,12 @@ Esta evaluación documenta el uso técnico actual. Cualquier cambio que conviert
 
         gsap.fromTo('.floating-btn',
           {
-            ...accessibleFadeFrom,
+            autoAlpha: 0,
             scale: 0.45,
             rotation: style === 'elegante' ? -18 : 0
           },
           {
-            ...accessibleFadeTo,
+            autoAlpha: 1,
             scale: 1,
             rotation: 0,
             duration: 0.75,
